@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    int id;
+    char nome[50];
+} Produto;
+
+// Funcao de comparacao para qsort
+int compararProdutos(const void *a, const void *b) {
+    return strcmp(((Produto *)a)->nome, ((Produto *)b)->nome);
+}
+
+int buscaSequencialOtimizada(Produto *produtos, int tamanho, char *nome) {
+    // Verifica as primeiras 100 posicoes
+    for (int i = 0; i < tamanho && i < 100; i++) {
+        if (strcmp(produtos[i].nome, nome) == 0) {
+            return i; // Produto encontrado
+        }
+    }
+
+    // Se não encontrado nas primeiras 100 posicoes, realiza a busca binaria
+    int inicio = 100;
+    int fim = tamanho - 1;
+
+    while (inicio <= fim) {
+        int meio = inicio + (fim - inicio) / 2;
+        int comparacao = strcmp(produtos[meio].nome, nome);
+
+        if (comparacao == 0) {
+            return meio; // Produto encontrado
+        } else if (comparacao < 0) {
+            inicio = meio + 1;
+        } else {
+            fim = meio - 1;
+        }
+    }
+
+    return -1; // Produto nao encontrado
+}
+
+int main() {
+    int numProdutos;
+
+    printf("Digite o numero de produtos no estoque: ");
+    scanf("%d", &numProdutos);
+
+    Produto *estoque = (Produto *)malloc(numProdutos * sizeof(Produto));
+
+    for (int i = 0; i < numProdutos; i++) {
+        printf("Digite o ID e o nome do produto %d: ", i + 1);
+        scanf("%d %s", &estoque[i].id, estoque[i].nome);
+    }
+
+    // Ordena o estoque pelo nome do produto
+    qsort(estoque, numProdutos, sizeof(Produto), compararProdutos);
+
+    char nomeBusca[50];
+    printf("Digite o nome do produto que deseja buscar: ");
+    scanf("%s", nomeBusca);
+
+    // Realiza a busca otimizada
+    int indiceProduto = buscaSequencialOtimizada(estoque, numProdutos, nomeBusca);
+
+    if (indiceProduto != -1) {
+        printf("Produto encontrado - ID: %d, Nome: %s\n", estoque[indiceProduto].id, estoque[indiceProduto].nome);
+    } else {
+        printf("Produto não encontrado.\n");
+    }
+
+    free(estoque);
+
+    return 0;
+}
