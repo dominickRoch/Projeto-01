@@ -1,0 +1,67 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    int id;
+    char nome[50];
+} Produto;
+
+int compararProdutos(const void *a, const void *b) {
+    return strcmp(((Produto *)a)->nome, ((Produto *)b)->nome);
+}
+
+int buscaBinariaPorNome(Produto *produtos, int inicio, int fim, char *nome) {
+    while (inicio <= fim) {
+        int meio = inicio + (fim - inicio) / 2;
+        int comparacao = strcmp(produtos[meio].nome, nome);
+
+        if (comparacao == 0) {
+            // Produto encontrado retorna o indice
+            return meio;
+        } else if (comparacao < 0) {
+            // O nome do produto esta a direita  ajusta o intervalo
+            inicio = meio + 1;
+        } else {
+            // O nome do produto esta a esquerda ajusta o intervalo
+            fim = meio - 1;
+        }
+    }
+
+    // Produto nao encontrado
+    return -1;
+}
+
+int main() {
+    int numProdutos;
+
+    printf("Digite o numero de produtos no estoque: ");
+    scanf("%d", &numProdutos);
+
+    Produto *estoque = (Produto *)malloc(numProdutos * sizeof(Produto));
+
+    for (int i = 0; i < numProdutos; i++) {
+        printf("Digite o ID e o nome do produto %d: ", i + 1);
+        scanf("%d %s", &estoque[i].id, estoque[i].nome);
+    }
+
+    // Ordena o estoque pelo nome do produto
+    qsort(estoque, numProdutos, sizeof(Produto), compararProdutos);
+
+    char nomeBusca[50];
+    printf("Digite o nome do produto que deseja buscar: ");
+    scanf("%s", nomeBusca);
+
+    // Realiza a busca binaria
+    int indiceProduto = buscaBinariaPorNome(estoque, 0, numProdutos - 1, nomeBusca);
+
+    if (indiceProduto != -1) {
+        printf("Produto encontrado - ID: %d, Nome: %s\n", estoque[indiceProduto].id, estoque[indiceProduto].nome);
+    } else {
+        printf("Produto não encontrado.\n");
+    }
+
+    free(estoque);
+
+    return 0;
+}
